@@ -1563,7 +1563,7 @@ class LocalAppState:
         result_paths = result.get("paths") if isinstance(result.get("paths"), Mapping) else {}
         xlsx_path = _text(result_paths.get("xlsx"))
         self.payload["stage"] = (
-            f"Экспорт данных создан: {rows_count} контрольных узлов; "
+            f"Экспорт данных создан: {rows_count} строк; "
             f"warnings {warnings_count}; missing inputs {missing_count}. Файл: {xlsx_path}"
         )
         self._update_export_data_action_state()

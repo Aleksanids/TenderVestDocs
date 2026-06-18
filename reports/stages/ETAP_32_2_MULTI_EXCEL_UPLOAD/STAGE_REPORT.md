@@ -1,45 +1,76 @@
-# ETAP 32.2 — загрузка двух Excel-таблиц листов 4 и 5
+# ETAP 32.2 — Multi Excel Upload
 
-status: `ok_with_warnings`
+Статус: `ok`
 
-## Цель
+## Итог
 
-Добавить возможность выбрать две Excel-таблицы за один импорт: отдельный файл с листом 4 / реестром закупок и отдельный файл с листом 5 / реестром контрактов. После загрузки приложение должно работать как раньше: общий реестр, карточки строк, нормализованные JSON/CSV и дальнейшие действия.
+Загрузка двух Excel-реестров проверена и доведена до зеленого локального gate.
 
-## Что изменено
+Подтверждено:
 
-- `src/tendervestdocs/services/import_service.py` — добавлены `preview_registries(...)` и `import_registries(...)`, общий импорт нескольких файлов в один `normalized_registry_v1`, поля `source_files` и `copied_source_files` в результатах/отчетах.
-- `src/tendervestdocs/ui/local_app.py` — `/api/import/preview` и `/api/import` принимают один или два upload-файла; добавлен state-level multi-file путь.
-- `src/tendervestdocs/ui/static/index.html` — input загрузки поддерживает `multiple`, пользовательская подпись обновлена под два Excel.
-- `src/tendervestdocs/ui/static/app.js` — добавлен `selectedFiles`, ограничение до двух файлов, отправка обоих файлов в `FormData`.
+- один Excel листа 4 импортируется как `procurement`;
+- один Excel листа 5 импортируется как `contract`;
+- два отдельных Excel импортируются в единый `normalized_registry_v1`;
+- `source_dataset_type`, `source_file`, `source_sheet`, `source_row_number` сохраняются;
+- контракты не смешиваются с закупками;
+- UI/API слой передает два файла через multi-file flow;
+- пользовательский сценарий через `LocalAppState` проходит без browser automation.
 
-## Проверено локально
+## Исправления после validation
 
-- `python -m py_compile src\tendervestdocs\services\import_service.py src\tendervestdocs\ui\local_app.py` — passed.
-- `python -m pytest tests\test_import_service.py tests\test_ui_shell.py --basetemp=runtime\pytest_tmp_multi_excel_upload` — `93 passed`.
-- `python -m compileall -q src tests` — passed.
+- `sheet6_check_data_export.py`: восстановлены helper-функции связи строк и сборка card-row для export-data, закрыт regression `_find_related_row` / `_find_related_contract_row` / `_export_data_table_row`.
+- `local_app.py`: статус export-data в UI больше не называет карточные строки контрольными узлами.
+- Локальные UI regression tests синхронизированы под multi-file wording в полном checkout.
 
-## Что не запускалось
+## Реальные проверки
 
-- live-download;
-- Playwright / Selenium;
-- browser discovery;
-- EXE / build / PyInstaller;
-- full pytest;
-- network smoke;
-- OCR;
-- ZIP rebuild.
+TEST fixtures:
+
+- лист 4: `769` procurement / `0` contract;
+- лист 5: `0` procurement / `100` contract;
+- два файла: `769` procurement / `100` contract;
+- combined workbook: `769` procurement / `100` contract.
+
+Реальные Excel из Downloads, на temp-копиях:
+
+- лист 4 `(1)`: `578` procurement / `0` contract;
+- лист 5 `(2)`: `0` procurement / `47` contract;
+- два файла: `578` procurement / `47` contract, total `625`.
+
+User-role smoke:
+
+- create project: ok;
+- preview: `combined_workbook`, mapping modal не нужен;
+- import: ok, rows `625`;
+- карточка первой строки и действия доступны;
+- top action скачивания доступен.
+
+## Тесты
+
+```text
+python -X utf8 -m py_compile src\tendervestdocs\services\sheet6_check_data_export.py src\tendervestdocs\services\import_service.py src\tendervestdocs\ui\local_app.py
+passed
+
+python -X utf8 -m pytest tests\test_sheet6_check_data_export.py tests\test_ui_ux_contract.py -q --basetemp=D:\Codex\tmp_pytest_hotfix_32_2
+35 passed
+
+python -X utf8 -m pytest tests\test_import_service.py tests\test_ui_shell.py -q --basetemp=D:\Codex\tmp_pytest_multi_excel
+93 passed
+
+python -X utf8 -m pytest tests -k "excel or import or registry or workbook or contract" -q --basetemp=D:\Codex\tmp_pytest_multi_excel_regression
+139 passed, 363 deselected
+
+python -X utf8 -m compileall src tests
+passed
+
+python -X utf8 -m pytest tests -q --basetemp=D:\Codex\tmp_pytest_full
+499 passed, 3 skipped
+```
 
 ## Ограничения
 
-- GitHub repo сейчас является компактным workflow/reporting контуром и не содержит полный source checkout приложения. В этот PR синхронизированы только измененные source-файлы и отчет этапа.
-- Изменённые локальные тесты сохранены в рабочем root `D:\Codex\TenderVestDocs`, но не добавлены в этот compact GitHub repo, чтобы не запускать неполный pytest tree в CI.
-- Multi-file mapping для нестандартных файлов не расширялся: новый путь рассчитан на распознанные Excel листов 4 и 5.
-
-## Безопасность
-
-- Исходные пользовательские Excel / CSV / DOCX / PDF / ZIP / HTML не изменялись.
-- Пользовательские документы, скачанные документы, runtime/cache/temp/downloads и тяжелые архивы не добавлялись.
-- Cookies / tokens / passwords / browser profiles / `.env` / credentials не читались.
-- Сеть, ЕИС, ЭТП, browser automation, Selenium и Playwright не запускались.
-- EXE / build / PyInstaller не создавались.
+- Browser automation / Playwright / Selenium не запускались.
+- Live network / ЕИС / ЭТП не запускались.
+- EXE / PyInstaller build не запускался.
+- Пользовательские Excel не добавлялись в PR.
+- ZIP не создавался.

@@ -1,20 +1,31 @@
-# ETAP 32.2 — handoff
+# HANDOFF — ETAP 32.2 Multi Excel Upload
 
-## Пользовательский сценарий
+Статус: `ok`
 
-1. Открыть или создать проект.
-2. В блоке загрузки выбрать два Excel-файла: лист 4 / реестр закупок и лист 5 / реестр контрактов.
-3. Приложение выполняет preview по двум файлам.
-4. Если оба файла распознаны, импорт запускается как обычный импорт.
-5. В таблице появляется общий реестр со строками закупок и контрактов.
+PR #3: https://github.com/Aleksanids/TenderVestDocs/pull/3
+Branch: `codex/multi-excel-upload-32-2`
 
-## Технический контракт
+## Что готово
 
-- Single-file import сохранен.
-- Multi-file import ограничен двумя файлами на UI/API уровне.
-- `ImportService.import_registries(...)` пишет один общий `normalized_registry_v1`.
-- В import summary доступны `source_files` и `copied_source_files`.
+- Multi-file Excel upload подтвержден для листа 4 и листа 5.
+- Preview и import работают для одного и двух файлов.
+- `normalized_registry_v1` создается общий.
+- `source_dataset_type` корректно разделяет закупки и контракты.
+- Source provenance сохраняется в normalized registry.
+- Full pytest зеленый в полном локальном checkout.
+- Пользовательский UI/API сценарий пройден без browser automation.
 
-## Следующий шаг
+## Handoff
 
-Провести ручной smoke на реальных двух Excel пользователя и после приемки решить, нужно ли расширять GitHub repo до полного source checkout приложения.
+Локальная папка полного proof:
+
+```text
+D:\Codex\TenderVestDocs\00_Передать_ChatGPT\01_ОТПРАВИТЬ_В_ЧАТ\ETAP_32_2_MULTI_EXCEL_UPLOAD_VALIDATE
+```
+
+В handoff есть `REAL_MULTI_EXCEL_IMPORT_PROOF.json` и `USER_ROLE_MULTI_EXCEL_PROOF.json` без пользовательских Excel.
+
+## Решение
+
+- Draft можно переводить в ready после зеленого GitHub Actions на новом commit.
+- Merge можно после зеленого GitHub Actions и review.

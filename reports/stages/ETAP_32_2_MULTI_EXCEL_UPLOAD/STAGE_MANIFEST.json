@@ -1,50 +1,38 @@
 {
   "stage": "ETAP_32_2_MULTI_EXCEL_UPLOAD",
-  "status": "ok_with_warnings",
-  "created_at": "2026-06-18T14:55:36+03:00",
-  "source_root": "D:/Codex/TenderVestDocs",
-  "github_worktree": "D:/Codex/TenderVestDocs/00_Передать_ChatGPT/git",
-  "changed_files_synced_to_github": [
-    "src/tendervestdocs/services/import_service.py",
-    "src/tendervestdocs/ui/local_app.py",
-    "src/tendervestdocs/ui/static/index.html",
-    "src/tendervestdocs/ui/static/app.js",
-    "reports/stages/ETAP_32_2_MULTI_EXCEL_UPLOAD/STAGE_REPORT.md",
-    "reports/stages/ETAP_32_2_MULTI_EXCEL_UPLOAD/TESTS.md",
-    "reports/stages/ETAP_32_2_MULTI_EXCEL_UPLOAD/HANDOFF.md",
-    "reports/stages/ETAP_32_2_MULTI_EXCEL_UPLOAD/STAGE_MANIFEST.json"
-  ],
-  "local_changed_files_not_synced_to_github": [
-    "tests/test_import_service.py",
-    "tests/test_ui_shell.py",
-    "CHATGPT_PROJECT_SOURCE.md",
-    "PROJECT_HISTORY.md",
-    "reports/ETAP_32_2_MULTI_EXCEL_UPLOAD/FINAL_REPORT.md",
-    "reports/ETAP_32_2_MULTI_EXCEL_UPLOAD/COMMANDS_AND_CHECKS.md",
-    "reports/ETAP_32_2_MULTI_EXCEL_UPLOAD/ARTIFACT_MANIFEST.json"
-  ],
-  "checks": [
-    {
-      "command": "python -m py_compile src\\tendervestdocs\\services\\import_service.py src\\tendervestdocs\\ui\\local_app.py",
-      "result": "passed"
+  "status": "ok",
+  "updated_at": "2026-06-18T16:30:00+03:00",
+  "branch": "codex/multi-excel-upload-32-2",
+  "pr": "https://github.com/Aleksanids/TenderVestDocs/pull/3",
+  "code_changed": true,
+  "checks": {
+    "py_compile": "passed",
+    "targeted_export_ui": "35 passed",
+    "import_ui_shell": "93 passed",
+    "excel_import_registry_regression": "139 passed, 363 deselected",
+    "compileall": "passed",
+    "full_pytest": "499 passed, 3 skipped"
+  },
+  "functional_smoke": {
+    "test_fixtures_two_files": {
+      "procurement": 769,
+      "contract": 100,
+      "total": 869
     },
-    {
-      "command": "python -m pytest tests\\test_import_service.py tests\\test_ui_shell.py --basetemp=runtime\\pytest_tmp_multi_excel_upload",
-      "result": "93 passed"
+    "real_downloads_two_files": {
+      "procurement": 578,
+      "contract": 47,
+      "total": 625
     },
-    {
-      "command": "python -m compileall -q src tests",
-      "result": "passed"
-    }
-  ],
+    "user_role_smoke": "ok"
+  },
   "safety": {
-    "user_documents_changed": false,
-    "user_documents_added_to_github": false,
-    "downloaded_documents_added_to_github": false,
-    "runtime_cache_temp_downloads_added": false,
-    "secrets_read": false,
-    "network_used": false,
+    "user_excels_added_to_pr": false,
+    "user_excels_modified": false,
+    "test_fixtures_modified": false,
+    "live_network_used": false,
     "browser_automation_used": false,
-    "exe_or_build_created": false
+    "secrets_read": false,
+    "zip_created": false
   }
 }
