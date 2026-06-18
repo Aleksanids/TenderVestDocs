@@ -1,0 +1,18 @@
+{
+  "stage": "",
+  "status": "",
+  "created_at": "",
+  "changed_files": [],
+  "created_files": [],
+  "commands_run": [],
+  "tests": [],
+  "warnings": [],
+  "limitations": [],
+  "safety_confirmations": {
+    "no_user_documents_committed": false,
+    "no_runtime_outputs_committed": false,
+    "no_secrets_committed": false,
+    "no_live_network_without_permission": false,
+    "no_browser_automation_without_permission": false
+  }
+}

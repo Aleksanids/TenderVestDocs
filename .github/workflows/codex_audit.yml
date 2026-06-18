@@ -1,0 +1,119 @@
+name: Codex audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  codex-audit:
+    name: Safe offline audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Python version
+        shell: bash
+        run: python --version
+
+      - name: Detect project root
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d src ] || [ -d tests ]; then
+            echo "PROJECT_DIR=." >> "$GITHUB_ENV"
+          elif [ -d TenderVestDocs/src ] || [ -d TenderVestDocs/tests ]; then
+            echo "PROJECT_DIR=TenderVestDocs" >> "$GITHUB_ENV"
+          else
+            echo "PROJECT_DIR=." >> "$GITHUB_ENV"
+          fi
+
+      - name: Install dependencies when available
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PROJECT_DIR"
+
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          elif [ -f requirements/base.txt ] || [ -f requirements/dev.txt ]; then
+            args=()
+            [ -f requirements/base.txt ] && args+=("-r" "requirements/base.txt")
+            [ -f requirements/dev.txt ] && args+=("-r" "requirements/dev.txt")
+            python -m pip install "${args[@]}"
+          else
+            echo "No requirements file found; dependency install skipped."
+          fi
+
+      - name: Compile Python sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PROJECT_DIR"
+
+          paths=()
+          [ -d src ] && paths+=(src)
+          [ -d tests ] && paths+=(tests)
+
+          if [ "${#paths[@]}" -eq 0 ]; then
+            echo "src/tests not found; compileall skipped."
+          else
+            python -X utf8 -m compileall "${paths[@]}"
+          fi
+
+      - name: Run pytest
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PROJECT_DIR"
+
+          if [ ! -d tests ]; then
+            echo "tests not found; pytest skipped."
+            exit 0
+          fi
+
+          python -X utf8 -m pytest tests -q
+
+      - name: Safety scan for forbidden files
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p audit_logs
+
+          if [ -n "${BASE_SHA:-}" ] && [ -n "${HEAD_SHA:-}" ]; then
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$HEAD_SHA" > audit_logs/changed_files.txt
+          else
+            git ls-files > audit_logs/changed_files.txt
+          fi
+
+          forbidden_regex='(^|/)(\.env($|\.)|runtime|cache|temp|tmp|downloads|AI_Export_Архивы_для_ИИ|03_Документы_закупок)(/|$)|(^|/).*(cookies|tokens|passwords|browser[ _-]?profiles).*(/|$)|\.(zip|7z|rar|exe|msi)$'
+
+          if grep -E -i "$forbidden_regex" audit_logs/changed_files.txt > audit_logs/forbidden_files.txt; then
+            echo "Forbidden files were detected in the change set." >&2
+            cat audit_logs/forbidden_files.txt >&2
+            exit 1
+          fi
+
+          echo "Safety scan passed." | tee audit_logs/safety_scan.txt
+
+      - name: Upload audit logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-audit-logs
+          path: audit_logs
+          if-no-files-found: ignore
