@@ -1,0 +1,38 @@
+{
+  "stage": "ETAP_32_2_MULTI_EXCEL_UPLOAD",
+  "status": "ok",
+  "updated_at": "2026-06-18T16:30:00+03:00",
+  "branch": "codex/multi-excel-upload-32-2",
+  "pr": "https://github.com/Aleksanids/TenderVestDocs/pull/3",
+  "code_changed": true,
+  "checks": {
+    "py_compile": "passed",
+    "targeted_export_ui": "35 passed",
+    "import_ui_shell": "93 passed",
+    "excel_import_registry_regression": "139 passed, 363 deselected",
+    "compileall": "passed",
+    "full_pytest": "499 passed, 3 skipped"
+  },
+  "functional_smoke": {
+    "test_fixtures_two_files": {
+      "procurement": 769,
+      "contract": 100,
+      "total": 869
+    },
+    "real_downloads_two_files": {
+      "procurement": 578,
+      "contract": 47,
+      "total": 625
+    },
+    "user_role_smoke": "ok"
+  },
+  "safety": {
+    "user_excels_added_to_pr": false,
+    "user_excels_modified": false,
+    "test_fixtures_modified": false,
+    "live_network_used": false,
+    "browser_automation_used": false,
+    "secrets_read": false,
+    "zip_created": false
+  }
+}
