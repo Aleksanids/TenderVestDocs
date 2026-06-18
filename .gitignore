@@ -1,0 +1,114 @@
+# TenderVestDocs repository ignore rules
+
+# Secrets / credentials
+.env
+.env.*
+**/.env
+**/.env.*
+cookies
+cookies/
+*cookies*
+tokens
+tokens/
+*tokens*
+passwords
+passwords/
+*passwords*
+browser profiles/
+browser_profiles/
+browser-profile/
+browser_profile/
+**/User Data/
+**/Default/Cookies
+**/Login Data
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Virtual environments and dependencies
+.venv/
+venv/
+env/
+node_modules/
+
+# Python caches
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Runtime / generated outputs
+runtime/
+cache/
+temp/
+tmp/
+downloads/
+downloaded/
+output/
+outputs/
+logs/
+*.log
+
+# Local handoff / exchange folders
+handoff/
+Передать в GPT/
+00_Передать_ChatGPT/
+00_Передать_Claude/
+
+# User project zones and heavy source folders
+AI_Export_Архивы_для_ИИ/
+00_Бриф_и_вводные/
+01_Исходные_выгрузки/
+02_Очищенные_реестры/
+03_Документы_закупок/
+04_Нормативная_проверка/
+05_Рабочие_версии_листов/
+06_Финальный_отчет_и_материалы_клиенту/
+07_Контроль_и_проблемные_строки/
+99_Архив/
+
+# Archives / installers / binaries
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+*.bz2
+*.xz
+*.exe
+*.msi
+
+# User documents and source exports
+*.pdf
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.csv
+
+# Editor / OS noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Small synthetic fixtures and process reports are allowed.
+!tests/
+!tests/fixtures/
+!tests/fixtures/**/*.json
+!tests/fixtures/**/*.csv
+!tests/fixtures/**/*.xlsx
+!docs/
+!docs/**/*.md
+!reports/
+!reports/stages/
+!reports/stages/**/*.md
+!reports/stages/**/*.json
+!reports/stages/**/*.txt
