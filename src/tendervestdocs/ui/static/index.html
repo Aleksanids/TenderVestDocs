@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ТендерВест Документы</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Основная навигация">
+        <div class="brand">
+          <span class="brand-mark">ТВ</span>
+          <span class="brand-name">ТендерВест Документы</span>
+        </div>
+        <nav class="nav-list" id="leftNav"></nav>
+        <section class="sidebar-panel" id="sidebarProjectPanel" aria-label="Проект">
+          <div class="sidebar-panel-row">
+            <span>Текущий проект</span>
+            <strong id="projectName">Проект не выбран</strong>
+            <small id="projectPath" hidden></small>
+          </div>
+          <input id="projectPathInput" type="hidden" value="">
+          <div class="sidebar-actions">
+            <button id="createProjectButton" type="button">Создать проект</button>
+            <button id="openProjectButton" type="button">Открыть проект</button>
+          </div>
+          <section class="registry-upload-card" id="registryUploadCard" aria-label="Загрузка реестра">
+            <div class="sidebar-panel-row">
+              <span>Загрузка реестра</span>
+              <strong id="uploadTargetProject">Куда: проект не выбран</strong>
+            </div>
+            <label class="file-action primary sidebar-upload" aria-label="Выбрать табличный файл реестра">
+              <span class="sidebar-upload-title">Выбрать таблицы</span>
+              <small class="sidebar-upload-subtitle">до двух Excel: лист 4 и лист 5</small>
+              <input id="fileInput" type="file" accept=".xlsx,.csv" multiple>
+            </label>
+          </section>
+          <div class="sidebar-meta" id="registryMeta">
+            <span>Файл: <strong id="lastLoadedFile">не выбран</strong></span>
+            <span>Импорт: <strong id="lastImportTime">не выполнен</strong></span>
+            <span>Строк: <strong id="headerRowsCount">0</strong></span>
+          </div>
+        </section>
+        <section class="sidebar-panel" id="sidebarSettingsPanel" aria-label="Настройки" hidden>
+          <button class="sidebar-subitem active" type="button">Сопоставление колонок</button>
+          <button class="sidebar-subitem" type="button" disabled>Ширина таблицы</button>
+          <button class="sidebar-subitem" type="button" disabled>Вид карточки</button>
+        </section>
+      </aside>
+
+      <div class="workspace-split" id="workspaceSplit">
+      <main class="registry-pane" id="registryPane">
+        <header class="pane-header">
+          <div>
+            <div class="title-row">
+              <h1 id="appTitle">Реестр закупок</h1>
+              <span class="status-pill" id="registryStatus">Не загружен</span>
+              <span class="status-pill secondary" id="projectStatus">Проект не создан</span>
+              <section class="top-actions" id="topActions" aria-label="Основные действия реестра"></section>
+            </div>
+            <p id="stageLabel">Создайте или откройте проект, затем выберите табличный файл.</p>
+          </div>
+        </header>
+
+        <section class="import-workflow" id="importWorkflow" aria-label="Импорт и сопоставление полей">
+          <div class="workflow-status">
+            <span class="strip-label">Импорт</span>
+            <strong id="importStatus">Файл реестра не выбран</strong>
+          </div>
+          <div class="preview-summary" id="previewSummary"></div>
+          <div class="workflow-actions">
+            <button id="previewImportButton" type="button" disabled>Проверить файл</button>
+            <button id="runImportButton" type="button" disabled>Импортировать</button>
+            <button id="cancelImportButton" type="button" disabled>Отмена импорта</button>
+          </div>
+        </section>
+
+        <div class="mapping-overlay" id="mappingModal" role="dialog" aria-modal="true" aria-labelledby="mappingModalTitle" hidden>
+          <section class="mapping-dialog">
+            <header class="mapping-dialog-header">
+              <div>
+                <span class="strip-label">Сопоставление колонок</span>
+                <strong id="mappingModalTitle">Колонка таблицы → Поле приложения</strong>
+              </div>
+              <button id="closeMappingModalButton" type="button">Закрыть</button>
+            </header>
+            <div class="mapping-grid" id="mappingGrid"></div>
+            <div class="mapping-dialog-actions">
+              <button id="checkMappingButton" type="button" disabled>Проверить сопоставление</button>
+              <button id="saveMappingButton" type="button" disabled>Сохранить сопоставление</button>
+              <button id="applyMappingButton" type="button" disabled>Применить сопоставление и импортировать</button>
+              <button id="resetMappingButton" type="button" disabled>Сбросить сопоставление</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="section-notice" id="sectionNotice" hidden></section>
+
+        <section class="settings-panel" id="settingsPanel" hidden aria-label="Настройки сопоставления колонок">
+          <div class="settings-header">
+            <div>
+              <span class="strip-label">Настройки</span>
+              <strong>Сопоставление колонок</strong>
+            </div>
+            <span id="savedMappingsCount">Сохранено: 0</span>
+          </div>
+          <div class="settings-mapping-list" id="savedMappingsList"></div>
+        </section>
+
+        <section class="kpi-row" id="kpiRow" aria-label="KPI реестра"></section>
+
+        <section class="registry-tabs" id="registryTabs" aria-label="Разделы смешанного реестра" hidden></section>
+
+        <section class="filter-toolbar" id="filterToolbar" aria-label="Фильтры реестра">
+          <div class="filter-row quick-filter-row">
+            <button class="filter-toggle" id="filtersToggle" type="button" aria-expanded="false" aria-controls="filterPopover">Фильтры</button>
+            <label class="filter-control search-control">
+              <span>Поиск</span>
+              <input id="filterSearch" type="search" autocomplete="off" placeholder="Поиск по таблице...">
+            </label>
+          </div>
+
+          <div class="filter-popover" id="filterPopover" hidden>
+            <div class="filter-group">
+              <span class="filter-label">Приоритет</span>
+              <div class="priority-filters" id="priorityFilters"></div>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Закон</span>
+              <div class="filter-checks" id="lawFilters"></div>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Проверка</span>
+              <div class="filter-checks" id="checkStatusFilters"></div>
+            </div>
+            <div class="filter-popover-footer">
+              <span id="filterScopeInfo">Будет показано строк: 0</span>
+              <div class="filter-popover-actions">
+                <button class="reset-filters" id="resetFilters" type="button">Сбросить</button>
+                <button class="apply-filters" id="applyFilters" type="button">Применить</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-row summary-row">
+            <div class="active-filters" id="activeFilters" aria-label="Активные фильтры"></div>
+            <div class="row-counters" aria-live="polite">
+              <span>Всего строк: <strong id="totalRowsCount">0</strong></span>
+              <span>Показано: <strong id="visibleRowsCount">0</strong></span>
+            </div>
+          </div>
+
+          <p class="filtered-empty-state" id="filteredEmptyState" hidden>Нет строк по выбранным фильтрам</p>
+        </section>
+
+        <section class="table-wrap" aria-label="Реестр закупок">
+          <table>
+            <colgroup id="tableColGroup"></colgroup>
+            <thead>
+              <tr id="tableHead"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </section>
+      </main>
+
+      <span
+        class="pane-resizer"
+        id="cardPaneResizer"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Изменить ширину карточки строки"
+        tabindex="0"
+      ></span>
+
+      <aside class="card-pane" id="cardPane" aria-label="Карточка выбранной строки">
+        <header class="card-header">
+          <span>Правая карточка</span>
+          <strong id="selectedIdentifier">Идентификатор не указан</strong>
+        </header>
+        <div id="cardSections" class="card-sections"></div>
+      </aside>
+      </div>
+
+      <div class="download-confirm-overlay" id="downloadConfirmModal" role="dialog" aria-modal="true" aria-labelledby="downloadConfirmTitle" hidden>
+        <section class="download-confirm-dialog">
+          <header class="download-confirm-header">
+            <strong id="downloadConfirmTitle">Подтвердите скачивание документов</strong>
+            <button id="cancelDownloadConfirmButton" type="button" aria-label="Закрыть">×</button>
+          </header>
+          <p>Выберите, что нужно получить по выбранному набору строк.</p>
+          <div class="download-confirm-grid">
+            <span>Строк к обработке:</span>
+            <strong id="downloadRowsCount">0</strong>
+            <span>Ожидаемых документов:</span>
+            <strong id="downloadExpectedDocsCount">будет определено при подготовке скачивания</strong>
+            <span>Проект:</span>
+            <strong id="downloadProjectName">Проект не выбран</strong>
+            <span>Папка назначения:</span>
+            <strong id="downloadTargetFolder">03_Документы_закупок</strong>
+          </div>
+          <div class="download-mode-grid">
+            <button class="download-mode-option" id="downloadAllDocumentsButton" type="button">
+              <strong>Все документы</strong>
+              <span>Требуется проект. Файлы сохраняются в папки проекта.</span>
+            </button>
+            <button class="download-mode-option" id="downloadProtocolResultsButton" type="button">
+              <strong>Только результаты / протоколы</strong>
+              <span>Проект не требуется. Временные файлы удаляются после разбора.</span>
+            </button>
+          </div>
+          <div class="download-confirm-warning" id="downloadModeWarning">Полный пакет документов может занять продолжительное время.</div>
+          <footer class="download-confirm-actions">
+            <button id="cancelDownloadConfirmButtonFooter" type="button">Отмена</button>
+          </footer>
+        </section>
+      </div>
+
+      <div class="download-confirm-overlay" id="refreshConfirmModal" role="dialog" aria-modal="true" aria-labelledby="refreshConfirmTitle" hidden>
+        <section class="download-confirm-dialog refresh-confirm-dialog">
+          <header class="download-confirm-header">
+            <strong id="refreshConfirmTitle">Подтвердите обновление данных</strong>
+            <button id="cancelRefreshConfirmButton" type="button" aria-label="Закрыть">×</button>
+          </header>
+          <p id="refreshConfirmMessage">Будут обновлены сведения по выбранной области. Документы скачиваться не будут.</p>
+          <div class="download-confirm-grid">
+            <span>Область обновления:</span>
+            <strong id="refreshScopeLabel">Весь реестр</strong>
+            <span>Строк к обработке:</span>
+            <strong id="refreshRowsCount">0</strong>
+            <span>Документы:</span>
+            <strong>Не скачиваются автоматически</strong>
+          </div>
+          <div class="download-confirm-warning">Обновление данных не скачивает документы и не изменяет исходный табличный файл.</div>
+          <div class="refresh-progress" id="refreshProgressStatus" hidden>Обновление выполняется.</div>
+          <footer class="download-confirm-actions">
+            <button id="cancelRefreshConfirmButtonFooter" type="button">Отмена</button>
+            <button class="primary-action" id="confirmRefreshButton" type="button">Обновить данные</button>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
